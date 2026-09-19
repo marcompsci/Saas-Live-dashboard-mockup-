@@ -1,0 +1,541 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: MindFlow personal operating system API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: workspace
+    description: Dashboard and activity
+  - name: habits
+    description: Daily habits
+  - name: money
+    description: Spending and budget
+  - name: health-metrics
+    description: Health metrics
+  - name: growth
+    description: Social growth check-ins
+  - name: goals
+    description: Long-term goals
+  - name: calendar
+    description: Calendar preparation and export
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [workspace]
+      summary: Get the current user's dashboard
+      security: [{ clerkSession: [] }]
+      responses:
+        "200":
+          description: Dashboard snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dashboard"
+  /activity:
+    get:
+      operationId: listActivity
+      tags: [workspace]
+      summary: List recent activity
+      security: [{ clerkSession: [] }]
+      responses:
+        "200":
+          description: Recent activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Activity"
+  /habits:
+    get:
+      operationId: listHabits
+      tags: [habits]
+      summary: List habits
+      security: [{ clerkSession: [] }]
+      responses:
+        "200":
+          description: Habits
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Habit"
+    post:
+      operationId: createHabit
+      tags: [habits]
+      summary: Create a habit
+      security: [{ clerkSession: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HabitInput"
+      responses:
+        "201":
+          description: Created habit
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Habit"
+  /habits/{id}:
+    patch:
+      operationId: updateHabit
+      tags: [habits]
+      summary: Update a habit
+      security: [{ clerkSession: [] }]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HabitUpdate"
+      responses:
+        "200":
+          description: Updated habit
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Habit"
+    delete:
+      operationId: deleteHabit
+      tags: [habits]
+      summary: Delete a habit
+      security: [{ clerkSession: [] }]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Deleted
+  /habits/{id}/complete:
+    post:
+      operationId: completeHabit
+      tags: [habits]
+      summary: Toggle a habit completion for today
+      security: [{ clerkSession: [] }]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Updated habit
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Habit"
+  /expenses:
+    get:
+      operationId: listExpenses
+      tags: [money]
+      summary: List recent expenses
+      security: [{ clerkSession: [] }]
+      responses:
+        "200":
+          description: Expenses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Expense"
+    post:
+      operationId: createExpense
+      tags: [money]
+      summary: Record an expense
+      security: [{ clerkSession: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExpenseInput"
+      responses:
+        "201":
+          description: Created expense
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Expense"
+  /budget:
+    get:
+      operationId: getBudget
+      tags: [money]
+      summary: Get the weekly budget
+      security: [{ clerkSession: [] }]
+      responses:
+        "200":
+          description: Budget
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Budget"
+    patch:
+      operationId: updateBudget
+      tags: [money]
+      summary: Update the weekly budget
+      security: [{ clerkSession: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BudgetInput"
+      responses:
+        "200":
+          description: Budget
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Budget"
+  /health:
+    get:
+      operationId: getHealthMetrics
+      tags: [health-metrics]
+      summary: Get today's health metrics
+      security: [{ clerkSession: [] }]
+      responses:
+        "200":
+          description: Health metrics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthMetrics"
+  /health/movement:
+    post:
+      operationId: logMovement
+      tags: [health-metrics]
+      summary: Log movement
+      security: [{ clerkSession: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MovementInput"
+      responses:
+        "200":
+          description: Health metrics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthMetrics"
+  /growth:
+    get:
+      operationId: getGrowth
+      tags: [growth]
+      summary: Get social growth metrics
+      security: [{ clerkSession: [] }]
+      responses:
+        "200":
+          description: Growth metrics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Growth"
+  /growth/checkin:
+    post:
+      operationId: recordGrowthCheckin
+      tags: [growth]
+      summary: Record a growth check-in
+      security: [{ clerkSession: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GrowthInput"
+      responses:
+        "200":
+          description: Growth metrics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Growth"
+  /goals:
+    get:
+      operationId: listGoals
+      tags: [goals]
+      summary: List goals
+      security: [{ clerkSession: [] }]
+      responses:
+        "200":
+          description: Goals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Goal"
+  /goals/{id}/progress:
+    post:
+      operationId: logGoalProgress
+      tags: [goals]
+      summary: Log goal progress
+      security: [{ clerkSession: [] }]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GoalProgressInput"
+      responses:
+        "200":
+          description: Goal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Goal"
+  /calendar/prepare:
+    post:
+      operationId: prepareCalendarAction
+      tags: [calendar]
+      summary: Prepare an action for calendar export
+      security: [{ clerkSession: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CalendarPrepareInput"
+      responses:
+        "200":
+          description: Prepared calendar action
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CalendarPreparation"
+  /calendar/ics:
+    post:
+      operationId: exportCalendarIcs
+      tags: [calendar]
+      summary: Generate an ICS export for an action
+      security: [{ clerkSession: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CalendarPrepareInput"
+      responses:
+        "200":
+          description: ICS content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IcsExport"
+components:
+  securitySchemes:
+    clerkSession:
+      type: http
+      scheme: bearer
+      bearerFormat: Clerk
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status: { type: string }
+      required: [status]
+    User:
+      type: object
+      properties:
+        id: { type: string }
+        firstName: { type: string }
+        email: { type: string }
+        imageUrl: { type: ["string", "null"] }
+      required: [id, firstName, email, imageUrl]
+    Habit:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        category: { type: string }
+        scheduledTime: { type: string }
+        completed: { type: boolean }
+        streak: { type: integer }
+      required: [id, name, category, scheduledTime, completed, streak]
+    HabitInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        category: { type: string, minLength: 1 }
+        scheduledTime: { type: string, minLength: 1 }
+      required: [name, category, scheduledTime]
+    HabitUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        category: { type: string, minLength: 1 }
+        scheduledTime: { type: string, minLength: 1 }
+        completed: { type: boolean }
+    Expense:
+      type: object
+      properties:
+        id: { type: integer }
+        merchant: { type: string }
+        category: { type: string }
+        amount: { type: number }
+        spentAt: { type: string, format: date }
+      required: [id, merchant, category, amount, spentAt]
+    ExpenseInput:
+      type: object
+      properties:
+        merchant: { type: string, minLength: 1 }
+        category: { type: string, minLength: 1 }
+        amount: { type: number, exclusiveMinimum: 0 }
+        spentAt: { type: string, format: date }
+      required: [merchant, category, amount, spentAt]
+    Budget:
+      type: object
+      properties:
+        weeklyLimit: { type: number }
+        spent: { type: number }
+        remaining: { type: number }
+        percentUsed: { type: number }
+      required: [weeklyLimit, spent, remaining, percentUsed]
+    BudgetInput:
+      type: object
+      properties:
+        weeklyLimit: { type: number, exclusiveMinimum: 0 }
+      required: [weeklyLimit]
+    HealthMetrics:
+      type: object
+      properties:
+        steps: { type: integer }
+        sleepHours: { type: number }
+        readiness: { type: integer }
+        movementMinutes: { type: integer }
+      required: [steps, sleepHours, readiness, movementMinutes]
+    MovementInput:
+      type: object
+      properties:
+        minutes: { type: integer, minimum: 1 }
+      required: [minutes]
+    Growth:
+      type: object
+      properties:
+        audience: { type: integer }
+        weeklyGrowth: { type: integer }
+        growthPercent: { type: number }
+        lastCheckIn: { type: ["string", "null"], format: date }
+      required: [audience, weeklyGrowth, growthPercent, lastCheckIn]
+    GrowthInput:
+      type: object
+      properties:
+        audience: { type: integer, minimum: 0 }
+      required: [audience]
+    Goal:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        area: { type: string }
+        current: { type: number }
+        target: { type: number }
+        unit: { type: string }
+        dueDate: { type: string, format: date }
+        percentComplete: { type: number }
+      required: [id, title, area, current, target, unit, dueDate, percentComplete]
+    GoalProgressInput:
+      type: object
+      properties:
+        amount: { type: number, minimum: 0 }
+      required: [amount]
+    Activity:
+      type: object
+      properties:
+        id: { type: integer }
+        kind: { type: string }
+        title: { type: string }
+        detail: { type: string }
+        createdAt: { type: string, format: date-time }
+      required: [id, kind, title, detail, createdAt]
+    NextAction:
+      type: object
+      properties:
+        title: { type: string }
+        detail: { type: string }
+        sourceType: { type: string }
+        sourceId: { type: ["integer", "null"] }
+        dueLabel: { type: string }
+      required: [title, detail, sourceType, sourceId, dueLabel]
+    Dashboard:
+      type: object
+      properties:
+        user: { $ref: "#/components/schemas/User" }
+        dateLabel: { type: string }
+        flowScore: { type: integer }
+        completedToday: { type: integer }
+        totalToday: { type: integer }
+        nextAction: { $ref: "#/components/schemas/NextAction" }
+        habits:
+          type: array
+          items: { $ref: "#/components/schemas/Habit" }
+        budget: { $ref: "#/components/schemas/Budget" }
+        health: { $ref: "#/components/schemas/HealthMetrics" }
+        growth: { $ref: "#/components/schemas/Growth" }
+        goals:
+          type: array
+          items: { $ref: "#/components/schemas/Goal" }
+        activity:
+          type: array
+          items: { $ref: "#/components/schemas/Activity" }
+        dataMode: { type: string, enum: [demo, connected] }
+        dataMessage: { type: string }
+      required: [user, dateLabel, flowScore, completedToday, totalToday, nextAction, habits, budget, health, growth, goals, activity, dataMode, dataMessage]
+    CalendarPrepareInput:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        detail: { type: string, minLength: 1 }
+        date: { type: string, format: date }
+        startTime: { type: string }
+        durationMinutes: { type: integer, minimum: 5 }
+      required: [title, detail, date, startTime, durationMinutes]
+    CalendarPreparation:
+      type: object
+      properties:
+        title: { type: string }
+        detail: { type: string }
+        startIso: { type: string, format: date-time }
+        endIso: { type: string, format: date-time }
+        googleCalendarUrl: { type: string, format: uri }
+        status: { type: string, enum: [prepared] }
+        disclaimer: { type: string }
+      required: [title, detail, startIso, endIso, googleCalendarUrl, status, disclaimer]
+    IcsExport:
+      type: object
+      properties:
+        filename: { type: string }
+        content: { type: string }
+        disclaimer: { type: string }
+      required: [filename, content, disclaimer]
