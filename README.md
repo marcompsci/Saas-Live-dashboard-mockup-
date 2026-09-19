@@ -76,6 +76,12 @@ produced by Orval from `lib/api-spec/openapi.yaml` and are **not** committed in
 this archive. Run the codegen command above once after installing — before that,
 typechecking will report missing modules.
 
+### UI components
+
+Only the shadcn/ui components the app imports are vendored under
+`artifacts/mindflow/src/components/ui/`. `components.json` is committed, so any
+additional component can be pulled in with `pnpm dlx shadcn@latest add <name>`.
+
 ## Architecture decisions
 
 - The OpenAPI spec is the single source of truth; clients and server schemas are
